@@ -1,169 +1,118 @@
-function run(msg, matches)
+do
 
---------------------------
- local channel = "channel"
- local chat = "chat"
- local type = msg.to.type
- local receiver = get_receiver(msg)
- -------------------------
+function run(msg, matches)
+  
+  if matches[1] == '!help' then
+  return [[  
+  
+   برای دیدن دستورات فان :
+  !help fun
+  
+  
+  برای دیدن تنظیمات مدیرتی از دستور :
+  !help admin
+  
+  ]]
+  end
+if matches[1] == '/help fun' then
+  return [[  
+  
+  !calc : ماشین حساب
+  
+  !id : نمایش ایدی شما
+  
+  !info : نمایش اطلاعاتی از شما
+  
+  !mstick : برای تبدیل عکس به استیکر
+  
+  !qr [text] : ساخت بار کد
+  
+  !sticker [Text] : ساخت استیکر با ساپورت فارسی
  
-    if matches[1] == "sethelp" then
-	    if is_sudo(msg) then
-            if type == channel then
-	            hash = "help:sp"
-				text = matches[2]
-			    redis:set(hash, text)
-				file = io.open("./data/tmp/HelpSuper.txt", "w")
-				file:write(text)
-				file:flush()
-				file:close()
-				send_document(receiver, "./data/tmp/HelpSuper.txt", ok_cb, false)
-				return "Help of supergroup has been changed successful!"
-			elseif type == chat then
-			    hash = "help:gp"
-				text = matches[2]
-			    redis:set(hash, text)
-				file = io.open("./data/tmp/HelpChat.txt", "w")
-				file:write(text)
-				file:flush()
-				file:close()
-				send_document(receiver, "./data/tmp/HelpChat.txt", ok_cb, false)
-				return "Help of chat has been changed successful!"
-			elseif type == "user" then
-			    return "Please use /sethelp commands in chat or supergroup!"
-		    end
-		elseif is_owner(msg) then
-		    if is_group(msg) or is_super_group(msg) then
-	            hash = "help:"..msg.to.id
-				text = matches[2]
-			    redis:set(hash, text)
-				file = io.open("./data/tmp/HelpOwner.txt", "w")
-				file:write(text)
-				file:flush()
-				file:close()
-				send_document(receiver, "./data/tmp/HelpOwner.txt", ok_cb, false)
-				return "Help of your group has been changed successful!"
-			elseif not is_group(msg) or not is_super_group(msg) then
-			    if type == channel then
-			        return "SuperGroup is not added!"
-				elseif type == chat then
-				    return "Group is not added!"
-				end
-			elseif type == "user" then
-			    return "Please use /sethelp commands in your chat or supergroup! (If you are an owner.)"
-		    end
-		elseif is_momod(msg) or not is_momod(msg) then
-		    return "Just for sudo or owner!"
-		end
-	end
-	
-	if matches[1] == "help" then
-	    if not is_super_group(msg) and type == channel then
-		    return "SuperGroup is not added!"
-		elseif not is_group(msg) and type == chat then
-		    return "Group is not added!"
-		end
-	    if not is_momod(msg) and msg.to.type ~= "user" then
-		    return "You cant see /help text"
-		end
-	        if type == channel then
-		        hash1 = "help:sp"
-			    hash2 = "help:"..msg.to.id
-		    elseif type == chat then
-		        hash1 = "help:gp"
-			    hash2 = "help:"..msg.to.id
-		    end
-			local one = io.open("./system/team", "r")
-            local two = io.open("./system/channel", "r")
-            local team = one:read("*all")
-            local channel = two:read("*all")
-			local is_hash1 = redis:get(hash1)
-			local is_hash2 = redis:get(hash2)
-			if is_hash1 and not is_hash2 then
-			    help = redis:get(hash1)
-			    return help
-		    elseif is_hash1 and is_hash2 then
-			    help = redis:get(hash2)
-				return help.."\n\n⚡️ [👉 Powered by "..team.." ] ⚡️\n📎 [👉 Join: "..channel.." ]"
-			elseif not is_hash1 and is_hash2 then
-			    help = redis:get(hash2)
-				return help.."\n\n⚡️ [👉 Powered by "..team.." ] ⚡️\n📎 [👉 Join: "..channel.." ]"
-			elseif not is_hash1 and not is_hash2 then
-			    local error = "Error! help text not found! please use /sethelp (text) or /setlang [en/fa/فا] for fix it."
-			    if msg.to.type == "channel" then
-				    if not redis:get("sp:lang") then
-					    return error
-				    elseif redis:get("sp:lang") == "fa" then
-					    help = http.request("http://bayanbox.ir/view/5471839359323765817/1473700489.txt")
-						return help
-					elseif redis:get("sp:lang") == "en" then
-					    help = http.request("http://bayanbox.ir/view/2464499846575247722/1473726399.txt")
-						return help
-				    elseif redis:get("sp:lang") == "فا" then
-					    help = http.request("http://bayanbox.ir/view/4775156283001435341/1473703817.txt")
-						return help
-					end
-				elseif msg.to.type == "chat" then
-				    if not redis:get("gp:lang") then
-					    return error
-				    elseif redis:get("gp:lang") == "fa" then
-					    help = http.request("http://bayanbox.ir/view/5626928239319986321/1473685968.txt")
-						return help
-					elseif redis:get("gp:lang") == "en" then
-					    help = http.request("http://bayanbox.ir/view/4738545992192475713/1473743959.txt")
-						return help
-				    elseif redis:get("gp:lang") == "فا" then
-					    help = http.request("http://bayanbox.ir/view/733616325716785386/1473704736.txt")
-						return help
-					end
-				end
-			end
-	end
-	
-	if matches[1] == "delhelp" then
-	    if is_sudo(msg) then
-		    if type == channel then
-			    if redis:get("help:sp") then
-			        hash = "help:sp"
-				    redis:del(hash)
-				    return "Help of supergroup has been removed!"
-				else
-				    return "Error! help not found, please set help text with /sethelp commands."
-				end
-		    elseif type == chat then
-			    if redis:get("help:gp") then
-			        hash = "help:gp"
-				    redis:del(hash)
-				    return "Help of chat has been removed!"
-				else
-				    return "Error! help not found, please set help text with /sethelp commands."
-				end
-			end
-		elseif is_owner(msg) then
-			if type == channel and is_super_group(msg) then
-			    if redis:get("help:"..msg.to.id) then
-			        hash = "help:"..msg.to.id
-			        redis:del(hash)
-			        return "Help of your supergroup has been removed!"
-				else
-				    return "Error! help not found, please set help text with /sethelp commands."
-				end
-			elseif type == chat and is_group(msg) then
-			    if redis:get("help:"..msg.to.id) then
-			        hash = "help:"..msg.to.id
-			        redis:del(hash)
-			        return "Help of your chat has been removed!"
-				else
-				    return "Error! help not found, please set help text with /sethelp commands."
-				end
-			end
-		elseif not is_momod(msg) then
-		    return "You cant remove help text! (Just for sudo)"
-		end
-	end
+  !rm [number] : حذف پیام 
+  
+  !vc [text] : تبدیل متن به صدا
+  
+  !vote [text] : نظرسنجی گرفتن در گروه
+
+  !weather [text] : نمایش وضعیت آب و هوا شهرها -دقت شود نام شهر به انگلیسی وارد شود
+  
+  !actuser : فعال ترین کاربران
+
+  !wiki [text] : سرچ در وکیپدیا 
+
+  !youtube [text] : سرچ در  یوتیوب 
+
+  !danestani : فرستادن متن های دانستنی
+
+
+  برای دیدن تنظیمات مدیرتی از دستور :
+  
+  !help admin
+  
+  ]]
+  end
+
+  if matches[1] == '!help admin' then
+  return [[  👤دستورات مدیریتی👤 :
+  
+  
+  !who : برای دریافت اطلاعات کامل اعضا
+  
+  !block [reply] : بلاک کردن یوزر از گروه
+  
+  !tosuper : برای ارتقاع گروه به سوپر گروه
+  
+  !kick [id] : کیک  یوزر مورد نظر
+  
+  !ban [reply] : بن کردن یوزر در گروه
+  
+  !modlist : برای نمایش ادمین ها 
+  
+  !promote [reply] : ترفیع به مدیریت در ربات
+  
+  !demote [reply]: حدف کردن از مدریت ربات
+  
+  !setname [newname] : عوض کردن اسم گروه
+  
+  !setphoto : برای تغییر عکس گروه
+  
+  !del [reply] : برای پاک کردن چت
+  
+  !setabout [your Text] : اضافه کردن توضیحات گروه
+  
+  !setrules [Your Text] : نوشتن قوانین گروه
+  
+  !rules : برای دریافت قوانین
+  
+  !public [yes/no] : برای اینکه کسی بتونی با ایدی گروه وارد شه 
+  
+  !settings : نمایش تنظیمات گروه
+  
+  !setlink : ست کردن لینک
+  
+  !newlink : ساختن لینک جدید
+  
+  !link : نمایش لینک گروه 
+
+  دستورات بیشتر در کانال کیک اسپمر:
+  @kickspammer
+ _______________________________
+  
+  
+]]
 end
+end
+
+
 return {
-advan = "https://github.com/Tarfand-pro/cs",
-patterns = {"^[!#/](help)$","^[!#/]([Ss]ethelp) (.*)$","^[!#/](delhelp)$"},
-run = run,
+  description = "Shows bot version", 
+  usage = "version: Shows bot version",
+  patterns = {
+    "^[#!/]help fun$",
+    "^[#!/]help admin$"
+  }, 
+  run = run 
 }
+
+end
